@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.Backend", "WebAPI.Backend\WebAPI.Backend.csproj", "{69D55F47-685B-4ABC-8673-5220528EB7D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{72459AEF-45C1-4ADE-AAB1-C4847B83EC30}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\AzureWebsitePublishModule.psm1 = PublishScripts\AzureWebsitePublishModule.psm1
+		PublishScripts\Publish-WebApplicationWebsite.ps1 = PublishScripts\Publish-WebApplicationWebsite.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{51BA952C-60DE-4278-A4DF-4DB92686ED74}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Configurations\WebAPIBackend-WAWS-dev.json = PublishScripts\Configurations\WebAPIBackend-WAWS-dev.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{EF4FEFC2-EDE0-49C6-A221-4F703D987BA4}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{69D55F47-685B-4ABC-8673-5220528EB7D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D55F47-685B-4ABC-8673-5220528EB7D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D55F47-685B-4ABC-8673-5220528EB7D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D55F47-685B-4ABC-8673-5220528EB7D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{51BA952C-60DE-4278-A4DF-4DB92686ED74} = {72459AEF-45C1-4ADE-AAB1-C4847B83EC30}
+	EndGlobalSection
+EndGlobal
