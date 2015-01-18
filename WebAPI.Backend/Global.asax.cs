@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using WebAPI.Backend.App_Start;
 
 namespace WebAPI.Backend
 {
@@ -7,6 +8,7 @@ namespace WebAPI.Backend
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            AutoMapperConfig.Configure();
         }
     }
 }
