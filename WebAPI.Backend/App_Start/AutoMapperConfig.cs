@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Shared.Models;
 using WebAPI.Backend.Models;
 
 namespace WebAPI.Backend.App_Start

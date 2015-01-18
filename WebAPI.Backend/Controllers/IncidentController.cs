@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Web.Http;
 using AutoMapper;
+using Shared.Models;
 using WebAPI.Backend.Models;
 
 namespace WebAPI.Backend.Controllers

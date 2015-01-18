@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebAPI.Backend.Models
+namespace Shared.Models
 {
     public class Incident
     {
