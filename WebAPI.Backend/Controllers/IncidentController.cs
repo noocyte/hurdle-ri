@@ -19,11 +19,7 @@ namespace WebAPI.Backend.Controllers
         public async Task<IHttpActionResult> Get(string company, string id)
         {
             var result = await _repository.GetByIdAsync(company, id);
-            if (!result.Success) return StatusCode(result.Status);
-
-            var dto = result.Result;
-            var incident = Mapper.Map<Incident>(dto);
-            return Ok(incident);
+            return HandleResponse(result);
         }
 
         [Route("api/incident/{company}/{id}")]
@@ -44,11 +40,17 @@ namespace WebAPI.Backend.Controllers
             Func<IncidentDto, Task<TableResponse<IncidentDto>>> createOrUpdateFunc)
         {
             Mapper.Map(obj, dto);
-
             var result = await createOrUpdateFunc(dto);
-            if (result.Success)
-                return Ok(result.Result);
-            return StatusCode(result.Status);
+            return HandleResponse(result);
+        }
+
+        private IHttpActionResult HandleResponse(TableResponse<IncidentDto> result)
+        {
+            if (!result.Success) return StatusCode(result.Status);
+
+            var dto = result.Result;
+            var incident = Mapper.Map<Incident>(dto);
+            return Ok(incident);
         }
     }
 }
