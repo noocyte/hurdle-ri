@@ -9,7 +9,7 @@ namespace WebAPI.Backend.Controllers
     {
         private readonly IncidentRepository _repository;
 
-        public IncidentController() // ninject!!
+        public IncidentController() // todo ninject
         {
             _repository = new IncidentRepository(null);
         }
@@ -32,6 +32,18 @@ namespace WebAPI.Backend.Controllers
             Mapper.Map(obj, dto);
 
             var result = await _repository.CreateAsync(dto);
+            if (result.Success)
+                return Ok(result.Result);
+            return StatusCode(result.Status);
+        }
+
+        [Route("api/incident/{company}/{id}")]
+        public async Task<IHttpActionResult> Patch(string company, string id, [FromBody] Incident obj)
+        {
+            var dto = new IncidentDto(company, id) {ETag = "*"};
+            Mapper.Map(obj, dto);
+
+            var result = await _repository.UpdateAsync(dto);
             if (result.Success)
                 return Ok(result.Result);
             return StatusCode(result.Status);
