@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Microsoft.WindowsAzure.Storage;
+using System.Configuration;
+using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
 
@@ -10,17 +8,36 @@ namespace WebAPI.Backend.Models
 {
     public class IncidentRepository
     {
-        private StorageCredentials cred = new StorageCredentials("uxhurdle",
-            "FdLMeczIrFo7Jtcoad1GL6AFYS5abqU2G53T3KapK/pbS1lRzNMq7jZdz8ziZy2ScewEzRn66w0/NnkzbZehzA==");
+        private static readonly string AccountName = ConfigurationManager.AppSettings["storageName"];
 
-        StorageUri uri = new StorageUri(new Uri("https://uxhurdle.table.core.windows.net/"));
+        private readonly StorageCredentials _cred = new StorageCredentials(AccountName,
+            ConfigurationManager.AppSettings["storageKey"]);
+
+        private readonly CloudTable _table;
+        private readonly Uri _uri = new Uri(String.Format("https://{0}.table.core.windows.net/", AccountName));
 
         public IncidentRepository(CloudTableClient client)
         {
             if (client == null)
-                client = new CloudTableClient(uri, cred);
+                client = new CloudTableClient(_uri, _cred);
 
-            var table = client.GetTableReference("incident");
+            _table = client.GetTableReference("incident");
+        }
+
+        public async Task<TableResponse<IncidentDto>> GetByIdAsync(string company, string id)
+        {
+            await _table.CreateIfNotExistsAsync();
+            var operation = TableOperation.Retrieve<IncidentDto>(company, id);
+            var result = await _table.ExecuteAsync(operation);
+            return new TableResponse<IncidentDto>(result);
+        }
+
+        public async Task<TableResponse<IncidentDto>> CreateAsync(IncidentDto incident)
+        {
+            await _table.CreateIfNotExistsAsync();
+            var operation = TableOperation.Insert(incident);
+            var result = await _table.ExecuteAsync(operation);
+            return new TableResponse<IncidentDto>(result);
         }
     }
 }
