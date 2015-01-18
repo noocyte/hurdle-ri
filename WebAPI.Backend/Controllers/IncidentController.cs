@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Web.Http;
 using AutoMapper;
 using WebAPI.Backend.Models;
@@ -29,21 +30,22 @@ namespace WebAPI.Backend.Controllers
         public async Task<IHttpActionResult> Post(string company, string id, [FromBody] Incident obj)
         {
             var dto = new IncidentDto(company, id);
-            Mapper.Map(obj, dto);
-
-            var result = await _repository.CreateAsync(dto);
-            if (result.Success)
-                return Ok(result.Result);
-            return StatusCode(result.Status);
+            return await CreateOrUpdateAsync(obj, dto, _repository.CreateAsync);
         }
 
         [Route("api/incident/{company}/{id}")]
         public async Task<IHttpActionResult> Patch(string company, string id, [FromBody] Incident obj)
         {
             var dto = new IncidentDto(company, id) {ETag = "*"};
+            return await CreateOrUpdateAsync(obj, dto, _repository.UpdateAsync);
+        }
+
+        private async Task<IHttpActionResult> CreateOrUpdateAsync(Incident obj, IncidentDto dto,
+            Func<IncidentDto, Task<TableResponse<IncidentDto>>> createOrUpdateFunc)
+        {
             Mapper.Map(obj, dto);
 
-            var result = await _repository.UpdateAsync(dto);
+            var result = await createOrUpdateFunc(dto);
             if (result.Success)
                 return Ok(result.Result);
             return StatusCode(result.Status);
