@@ -1,28 +1,18 @@
 ﻿using System;
 using System.Configuration;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace WebAPI.Backend.Models
 {
-    public class IncidentRepository
+    public class IncidentRepository : IIncidentRepository
     {
-        private static readonly string AccountName = ConfigurationManager.AppSettings["storageName"];
-
-        private readonly StorageCredentials _cred = new StorageCredentials(AccountName,
-            ConfigurationManager.AppSettings["storageKey"]);
-
         private readonly CloudTable _table;
-        private readonly Uri _uri = new Uri(String.Format("https://{0}.table.core.windows.net/", AccountName));
 
         public IncidentRepository(CloudTableClient client)
         {
-            if (client == null)
-                client = new CloudTableClient(_uri, _cred);
-
             _table = client.GetTableReference("incident");
         }
 

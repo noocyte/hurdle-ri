@@ -8,11 +8,11 @@ namespace WebAPI.Backend.Controllers
 {
     public class IncidentController : ApiController
     {
-        private readonly IncidentRepository _repository;
+        private readonly IIncidentRepository _repository;
 
-        public IncidentController() // todo ninject
+        public IncidentController(IIncidentRepository repository)
         {
-            _repository = new IncidentRepository(null);
+            _repository = repository;
         }
 
         [Route("api/incident/{company}/{id}")]
@@ -36,7 +36,7 @@ namespace WebAPI.Backend.Controllers
         [Route("api/incident/{company}/{id}")]
         public async Task<IHttpActionResult> Patch(string company, string id, [FromBody] Incident obj)
         {
-            var dto = new IncidentDto(company, id) {ETag = "*"};
+            var dto = new IncidentDto(company, id) {ETag = "*"}; // consider etag in header, not impl. now
             return await CreateOrUpdateAsync(obj, dto, _repository.UpdateAsync);
         }
 
