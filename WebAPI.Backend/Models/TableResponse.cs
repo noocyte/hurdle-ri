@@ -12,6 +12,8 @@ namespace WebAPI.Backend.Models
             _result = result;
         }
 
+
+
         public bool Success { get { return _result.HttpStatusCode < 300; }} // 304?
         public HttpStatusCode Status { get { return (HttpStatusCode)_result.HttpStatusCode; } }
         public T Result

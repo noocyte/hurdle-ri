@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace WebAPI.Backend.Models
@@ -22,6 +22,25 @@ namespace WebAPI.Backend.Models
             var operation = TableOperation.Retrieve<IncidentDto>(company, id);
             var result = await _table.ExecuteAsync(operation);
             return new TableResponse<IncidentDto>(result);
+        }
+
+        public async Task<TableResponse<IncidentDto>> GetAllAsync(string company)
+        {
+            await _table.CreateIfNotExistsAsync();
+            var q = new TableQuery<IncidentDto>()
+                .Where("PartitionKey eq '" + company + "'");
+            
+            var result = new List<IncidentDto>();
+            TableContinuationToken token = null;
+            do
+            {
+                var r = await _table.ExecuteQuerySegmentedAsync(q, token);
+                token = r.ContinuationToken;
+                result.AddRange(r.Results);
+
+            } while (token != null);
+
+            return new TableResponse<IncidentDto>(new TableResult {HttpStatusCode = 200, Result = result});
         }
 
         public async Task<TableResponse<IncidentDto>> CreateAsync(IncidentDto incident)

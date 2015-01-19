@@ -1,14 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Configuration;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using ConsoleMenu;
+using Fare;
+using Newtonsoft.Json;
 using Shared.Models;
 
 namespace Hurdle.FrontEnd
 {
     internal class Program
     {
+        private static HttpClient _client;
+
         private static void Main(string[] args)
         {
             var cts = new CancellationTokenSource();
@@ -23,58 +28,76 @@ namespace Hurdle.FrontEnd
 
         private static async Task MainAsync(string[] args, CancellationToken token)
         {
-            var menu = MenuHelper.GetOperations();
-
-            var operation = menu.Display();
-            if (operation.IsExit) return;
-
-            Console.WriteLine("What company to use?");
-            var company = Console.ReadLine();
-
-            Console.WriteLine("What id to use?");
-            var id = Console.ReadLine();
-
-            if (operation.RequiresBody)
+            var baseUrl = ConfigurationManager.AppSettings["baseurl"];
+            _client = new HttpClient();
+            using (_client)
             {
-                var incident = new Incident();
-                Console.WriteLine("Incident Title?");
-                incident.Title = Console.ReadLine();
+                var newIncident = new Incident
+                {
+                    Deadline = DateTime.UtcNow.AddDays(7),
+                    Description = "Some long desc.",
+                    Status = "New",
+                    Title = "New incident"
+                };
+                var prefixGenerator = new Fare.Xeger("^[a-z][a-z0-9]{7}$");
+                var randomCompanyName = prefixGenerator.Generate();
 
-                Console.WriteLine("Incident Description?");
-                incident.Description = Console.ReadLine();
+                var requestUri = String.Format("{0}/api/{1}/incident/", baseUrl, randomCompanyName);
 
-                Console.WriteLine("Incident Status?");
-                incident.Status = Console.ReadLine();
+                await OutputOperation("GET", () => _client.GetAsync(requestUri, token));
+                await OutputOperation("GET", () => _client.GetAsync(requestUri + 1, token));
+                await OutputOperation("PUT", () =>
+                {
+                    var stringContent = new StringContent(JsonConvert.SerializeObject(newIncident));
+                    stringContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    return _client.PutAsync(requestUri + 1, stringContent, token);
+                });
+                await OutputOperation("GET", () => _client.GetAsync(requestUri + 1, token));
+                Console.WriteLine("Changing the incident status to 'in progress'");
+                newIncident.Status = "In progress";
+                await OutputOperation("PUT", () =>
+                {
+                    var stringContent = new StringContent(JsonConvert.SerializeObject(newIncident));
+                    stringContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    return _client.PutAsync(requestUri + 1, stringContent, token);
+                });
+                await OutputOperation("GET", () => _client.GetAsync(requestUri + 1, token));
 
-                Console.WriteLine("Incident Deadline?");
-                var deadline = Console.ReadLine();
-                incident.Deadline = DateTime.Parse(deadline);
+                Console.WriteLine("Storing a bunch of incidents with...");
+                for (var i = 2; i <= 20; i++)
+                {
+                    await OutputOperation("PUT", () =>
+                    {
+                        var content = new StringContent(JsonConvert.SerializeObject(CreateIncident(i)));
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                        return _client.PutAsync(requestUri + i, content, token);
+                    });
+                }
+
             }
-
+            Console.WriteLine("Looking for some Incidents");
         }
-    }
 
-    public class Operation
-    {
-        public string Name { get; set; }
-        public bool IsExit { get; set; }
-        public bool RequiresBody { get; set; }
-
-    }
-
-    public static class MenuHelper
-    {
-        public static TypedMenu<Operation> GetOperations()
+        private static Incident CreateIncident(int i)
         {
-            var ops = new List<Operation>
+            var newIncident = new Incident
             {
-                new Operation {Name = "Get"},
-                new Operation {Name = "Post", RequiresBody = true},
-                new Operation {Name = "Patch", RequiresBody = true},
-                new Operation {Name = "Exit", IsExit = true}
+                Deadline = DateTime.UtcNow.AddDays(7),
+                Description = "Some long desc.",
+                Status = "New",
+                Title = "New incident - " + i
             };
 
-            return new TypedMenu<Operation>(ops, "Pick an operation", operation => operation.Name);
+            return newIncident;
+        }
+
+        private static async Task OutputOperation(string operation, Func<Task<HttpResponseMessage>> incidentsResponseFunc)
+        {
+            var incidentsResponse = await incidentsResponseFunc();
+            Console.WriteLine("Did a {0} operation - Response Status Code: {1}", operation, incidentsResponse.StatusCode);
+
+            var responseAsString = await incidentsResponse.Content.ReadAsStringAsync();
+            Console.WriteLine("Response was: {0}", responseAsString);
         }
     }
 }

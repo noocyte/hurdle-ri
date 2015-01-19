@@ -16,24 +16,24 @@ namespace WebAPI.Backend.Controllers
             _repository = repository;
         }
 
-        [Route("api/incident/{company}/{id}")]
-        public async Task<IHttpActionResult> Get(string company, string id)
+        [Route("api/{company}/incident/")]
+        public async Task<IHttpActionResult> GetAll(string company)
+        {
+            var result = await _repository.GetAllAsync(company);
+            return HandleResponse(result);
+        }
+
+        [Route("api/{company}/incident/{id}")]
+        public async Task<IHttpActionResult> GetOne(string company, string id)
         {
             var result = await _repository.GetByIdAsync(company, id);
             return HandleResponse(result);
         }
 
-        [Route("api/incident/{company}/{id}")]
-        public async Task<IHttpActionResult> Post(string company, string id, [FromBody] Incident obj)
+        [Route("api/{company}/incident/{id}")]
+        public async Task<IHttpActionResult> Put(string company, string id, [FromBody] Incident obj)
         {
-            var dto = new IncidentDto(company, id);
-            return await CreateOrUpdateAsync(obj, dto, _repository.CreateAsync);
-        }
-
-        [Route("api/incident/{company}/{id}")]
-        public async Task<IHttpActionResult> Patch(string company, string id, [FromBody] Incident obj)
-        {
-            var dto = new IncidentDto(company, id) {ETag = "*"}; // consider etag in header, not impl. now
+            var dto = new IncidentDto(company, id) {ETag = "*"}; // todo consider etag in header, not impl. now
             return await CreateOrUpdateAsync(obj, dto, _repository.UpdateAsync);
         }
 
